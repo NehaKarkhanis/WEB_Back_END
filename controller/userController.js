@@ -1,6 +1,7 @@
 const express = require('express');
 const { connectToDatabase } = require('../db/conn');
 const bcrypt = require('bcrypt');
+const { connect } = require('../routes/users');
 
 
 exports.get_user_list = async (request, response) => {
@@ -18,6 +19,28 @@ exports.get_user_list = async (request, response) => {
         });
     }
 };
+
+exports.get_user_details = async (request, response) => {
+    try {
+        const db = await connectToDatabase();
+        const user = await db.collection('users').findOne({
+            email: request.params.email
+        });
+        if (user) {
+            return response.status(200).json({
+                fname: user.fname,
+                lname: user.lname,
+                email: user.email
+            });
+        } else {
+            return response.status(400).json({
+                "message": 'No user details found'
+            });
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 exports.post_user_signup = async (request, response) => {
     try {
