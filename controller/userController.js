@@ -123,3 +123,18 @@ exports.post_validateUser = async (request, response) => {
     }
 };
 
+exports.put_update_user = async (request, response) => {
+    try {
+        console.log(request.body);
+        const db = await connectToDatabase();
+        db.collection('users').
+            updateOne({ email: request.body.email }, { $set: { fname: request.body.fname, lname: request.body.lname } });
+        return response.status(200).json({
+            'message': 'User Updated'
+        });
+    } catch (error) {
+        return response.status(500).json({
+            'message': 'Internal Server Error'
+        });
+    }
+};
