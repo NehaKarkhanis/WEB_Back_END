@@ -2,7 +2,10 @@ const express = require('express');
 const { connectToDatabase } = require('../db/conn');
 const bcrypt = require('bcrypt');
 const { connect } = require('../routes/users');
-
+const nodemailer = require('nodemailer');
+const { request } = require('express');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 exports.get_user_list = async (request, response) => {
     try {
@@ -103,13 +106,13 @@ exports.post_validateUser = async (request, response) => {
                                     'message': 'Authentication successful'
                                 })
                             } else {
-                                return response.status(400).json({
+                                return response.status(403).json({
                                     'message': 'Invalid User'
                                 })
                             }
                         })
                 } else {
-                    return response.status(400).json({
+                    return response.status(403).json({
                         'message': 'Invalid user'
                     })
                 }
@@ -125,7 +128,6 @@ exports.post_validateUser = async (request, response) => {
 
 exports.put_update_user = async (request, response) => {
     try {
-        console.log(request.body);
         const db = await connectToDatabase();
         db.collection('users').
             updateOne({ email: request.body.email }, { $set: { fname: request.body.fname, lname: request.body.lname } });
@@ -133,6 +135,70 @@ exports.put_update_user = async (request, response) => {
             'message': 'User Updated'
         });
     } catch (error) {
+        return response.status(500).json({
+            'message': 'Internal Server Error'
+        });
+    }
+};
+
+exports.get_pass_reset_key = async (request, response) => {
+    try {
+        const key = Math.random().toString(36).substring(2, 8);
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'virajj60@gmail.com', // Your email address
+                pass: process.env.gmail_pass // Your email password
+            }
+        });
+
+        const mailOptions = {
+            from: 'virajj60@gmail.com', // Your email address
+            to: request.params.email, // Recipient email address (provided in the request body)
+            subject: 'LastServe Password Reset Key',
+            text: `Your generated key is ${key}. Please use this key to reset your password.`
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log(info.response);
+
+        const db = await connectToDatabase();
+        db.collection('users').updateOne({ email: request.params.email }, { $set: { 'resetkey': key } }).then(
+            response.status(200).json({
+                'message': 'Reset key saved'
+            })
+        );
+
+    } catch (error) {
+        console.log(error);
+        return response.status(500).json({
+            'message': 'Internal Server Error'
+        });
+    }
+};
+
+exports.post_verify_resetkey = async (request, response) => {
+    try {
+        const db = await connectToDatabase();
+        db.collection('users').findOne({ email: request.body.email }).then(user => {
+            if (user) {
+                if (user.resetkey === request.body.resetKey) {
+                    return response.status(200).json({
+                        'message': 'Keys match'
+                    });
+                } else {
+                    return response.status(403).json({
+                        'message': 'Invalid key'
+                    })
+                }
+            } else {
+                return response.status(403).json({
+                    'message': 'Invalid key'
+                })
+            }
+        });
+    } catch (error) {
+        console.log(error);
         return response.status(500).json({
             'message': 'Internal Server Error'
         });
