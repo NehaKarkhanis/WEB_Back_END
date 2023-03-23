@@ -106,13 +106,13 @@ exports.post_validateUser = async (request, response) => {
                                     'message': 'Authentication successful'
                                 })
                             } else {
-                                return response.status(400).json({
+                                return response.status(403).json({
                                     'message': 'Invalid User'
                                 })
                             }
                         })
                 } else {
-                    return response.status(400).json({
+                    return response.status(403).json({
                         'message': 'Invalid user'
                     })
                 }
@@ -143,39 +143,32 @@ exports.put_update_user = async (request, response) => {
 
 exports.get_pass_reset_key = async (request, response) => {
     try {
+        const key = Math.random().toString(36).substring(2, 8);
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: 'virajj60@gmail.com', // Your email address
-                pass: '' // Your email password
+                pass: process.env.gmail_pass // Your email password
             }
         });
-
-        const key = Math.random().toString(36).substring(2, 8);
 
         const mailOptions = {
             from: 'virajj60@gmail.com', // Your email address
             to: request.params.email, // Recipient email address (provided in the request body)
-            subject: 'Your generated key',
-            text: `Your generated key is ${key}. Please use this key to proceed further.`
+            subject: 'LastServe Password Reset Key',
+            text: `Your generated key is ${key}. Please use this key to reset your password.`
         };
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log('Email sent: ' + info.response);
-            }
-        });
-
-        const savedKey = key;
+        const info = await transporter.sendMail(mailOptions);
+        console.log(info.response);
 
         const db = await connectToDatabase();
-        db.collection('users').updateOne({ email: request.params.email }, { $set: { 'resetkey': savedKey } }).then(
+        db.collection('users').updateOne({ email: request.params.email }, { $set: { 'resetkey': key } }).then(
             response.status(200).json({
                 'message': 'Reset key saved'
             })
         );
+
     } catch (error) {
         console.log(error);
         return response.status(500).json({
@@ -194,12 +187,12 @@ exports.post_verify_resetkey = async (request, response) => {
                         'message': 'Keys match'
                     });
                 } else {
-                    return response.status(400).json({
+                    return response.status(403).json({
                         'message': 'Invalid key'
                     })
                 }
             } else {
-                return response.status(400).json({
+                return response.status(403).json({
                     'message': 'Invalid key'
                 })
             }
