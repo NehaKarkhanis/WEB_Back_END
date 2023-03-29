@@ -147,14 +147,14 @@ exports.get_pass_reset_key = async (request, response) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'virajj60@gmail.com', // Your email address
-                pass: process.env.gmail_pass // Your email password
+                user: 'virajj60@gmail.com',
+                pass: process.env.gmail_pass
             }
         });
 
         const mailOptions = {
-            from: 'virajj60@gmail.com', // Your email address
-            to: request.params.email, // Recipient email address (provided in the request body)
+            from: 'virajj60@gmail.com',
+            to: request.params.email,
             subject: 'LastServe Password Reset Key',
             text: `Your generated key is ${key}. Please use this key to reset your password.`
         };
