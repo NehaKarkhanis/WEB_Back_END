@@ -130,6 +130,7 @@ exports.get_view_restaurant_details = async (request, response) => {
             'email': request.body.email
         }).then(restaurant => {
             const result = {
+                "name" : restaurant.name,
                 "email" : restaurant.email,
                 "address" : restaurant.address,
                 "postalcode" : restaurant.postalcode,
