@@ -147,20 +147,19 @@ exports.get_pass_reset_key = async (request, response) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'virajj60@gmail.com', // Your email address
-                pass: process.env.gmail_pass // Your email password
+                user: 'virajj60@gmail.com',
+                pass: process.env.gmail_pass
             }
         });
 
         const mailOptions = {
-            from: 'virajj60@gmail.com', // Your email address
-            to: request.params.email, // Recipient email address (provided in the request body)
+            from: 'virajj60@gmail.com',
+            to: request.params.email,
             subject: 'LastServe Password Reset Key',
             text: `Your generated key is ${key}. Please use this key to reset your password.`
         };
 
         const info = await transporter.sendMail(mailOptions);
-        console.log(info.response);
 
         const db = await connectToDatabase();
         db.collection('users').updateOne({ email: request.params.email }, { $set: { 'resetkey': key } }).then(
@@ -170,7 +169,7 @@ exports.get_pass_reset_key = async (request, response) => {
         );
 
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return response.status(500).json({
             'message': 'Internal Server Error'
         });
@@ -198,7 +197,24 @@ exports.post_verify_resetkey = async (request, response) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        return response.status(500).json({
+            'message': 'Internal Server Error'
+        });
+    }
+};
+
+exports.put_update_pass = async (request, response) => {
+    try {
+        const db = await connectToDatabase();
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(request.body.newPassword, salt);
+        db.collection('users').
+            updateOne({ email: request.body.email }, { $set: { password: hashedPassword } });
+        return response.status(200).json({
+            'message': 'Password Updated'
+        });
+    } catch (error) {
         return response.status(500).json({
             'message': 'Internal Server Error'
         });

@@ -11,5 +11,6 @@ user_router.get('/:email', user_controller.get_user_details);
 user_router.put('/update', user_controller.put_update_user);
 user_router.get('/resetKey/:email', user_controller.get_pass_reset_key);
 user_router.post('/verifyKey', user_controller.post_verify_resetkey);
+user_router.put('/updatePassword', user_controller.put_update_pass);
 
 module.exports = user_router;
