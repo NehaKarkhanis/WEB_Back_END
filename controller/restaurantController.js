@@ -1,3 +1,5 @@
+//Created By Arpit Ribadiya (B00932018)
+
 const express = require('express');
 const { connectToDatabase } = require('../db/conn');
 const bcrypt = require('bcrypt');
@@ -35,7 +37,8 @@ exports.post_restaurant_signup = async (request, response) => {
                     "postalcode": request.body.postalcode,
                     "phonenumber": request.body.phonenumber,
                     "email": request.body.email,
-                    "password": password_hash
+                    "password": password_hash,
+                    "isapproved": request.body.isapproved
                 });
                 return response.status(200).json({
                     "message": "Restaurant Registration Success"
@@ -80,7 +83,8 @@ exports.post_restaurant_login = async (request, response) => {
         const db = await connectToDatabase();
         db.collection('restaurants').findOne({ 'email': request.body.email })
             .then(restaurant => {
-                if (restaurant) {
+                console.log(restaurant.isapproved)
+                if (restaurant && restaurant.isapproved === 1) {
                     bcrypt.compare(request.body.password, restaurant.password)
                         .then(isMatch => {
                             if (isMatch) {
