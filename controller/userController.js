@@ -27,13 +27,13 @@ exports.get_user_details = async (request, response) => {
   try {
     const db = await connectToDatabase();
     const user = await db.collection("users").findOne({
-      email: request.params.email,
+      _id: request.params.email,
     });
     if (user) {
       return response.status(200).json({
         fname: user.fname,
         lname: user.lname,
-        email: user.email,
+        email: user._id,
       });
     } else {
       return response.status(400).json({
@@ -56,10 +56,8 @@ exports.post_user_signup = async (request, response) => {
           db.collection("users").insertOne({
             fname: request.body.fname,
             lname: request.body.lname,
-            email: request.body.email,
+            _id: request.body.email,
             password: password_hash,
-            subscribed_restaurants: [],
-            appointments: [],
           });
           return response.status(200).json({
             message: "Registration Success",
@@ -80,7 +78,7 @@ exports.post_existing_email_chk = async (request, response) => {
     const db = await connectToDatabase();
     db.collection("users")
       .findOne({
-        email: request.body.email,
+        _id: request.body.email,
       })
       .then((user) => {
         if (user) {
@@ -105,7 +103,7 @@ exports.post_validateUser = async (request, response) => {
   try {
     const db = await connectToDatabase();
     db.collection("users")
-      .findOne({ email: request.body.email })
+      .findOne({ _id: request.body.email })
       .then((user) => {
         if (user) {
           bcrypt
@@ -139,7 +137,7 @@ exports.put_update_user = async (request, response) => {
   try {
     const db = await connectToDatabase();
     db.collection("users").updateOne(
-      { email: request.body.email },
+      { _id: request.body.email },
       { $set: { fname: request.body.fname, lname: request.body.lname } }
     );
     return response.status(200).json({
@@ -174,7 +172,7 @@ exports.get_pass_reset_key = async (request, response) => {
 
     const db = await connectToDatabase();
     db.collection("users")
-      .updateOne({ email: request.params.email }, { $set: { resetkey: key } })
+      .updateOne({ _id: request.params.email }, { $set: { resetkey: key } })
       .then(
         response.status(200).json({
           message: "Reset key saved",
@@ -192,7 +190,7 @@ exports.post_verify_resetkey = async (request, response) => {
   try {
     const db = await connectToDatabase();
     db.collection("users")
-      .findOne({ email: request.body.email })
+      .findOne({ _id: request.body.email })
       .then((user) => {
         if (user) {
           if (user.resetkey === request.body.resetKey) {
@@ -224,7 +222,7 @@ exports.put_update_pass = async (request, response) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(request.body.newPassword, salt);
     db.collection("users").updateOne(
-      { email: request.body.email },
+      { _id: request.body.email },
       { $set: { password: hashedPassword } }
     );
     return response.status(200).json({
