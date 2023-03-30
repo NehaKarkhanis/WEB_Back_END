@@ -32,13 +32,16 @@ exports.post_restaurant_signup = async (request, response) => {
             bcrypt.hash(request.body.password, salt, async function (err, password_hash) {
                 const db = await connectToDatabase();
                 db.collection('restaurants').insertOne({
+                    "_id": request.body.email,
                     "name": request.body.name,
                     "address": request.body.address,
                     "postalcode": request.body.postalcode,
                     "phonenumber": request.body.phonenumber,
                     "email": request.body.email,
                     "password": password_hash,
-                    "isapproved": request.body.isapproved
+                    "isapproved": request.body.isapproved,
+                    "posts": [],
+                    "orders": []
                 });
                 return response.status(200).json({
                     "message": "Restaurant Registration Success"
