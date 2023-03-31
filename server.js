@@ -17,7 +17,7 @@ const db = connectToDatabase();
 app.use('/users', require('./routes/users'));
 app.use('/restaurants', require('./routes/restaurants'));
 app.use('/restaurantorders', require('./routes/restaurantOrders'));
-app.use('/volunteers', require('./routes/volunteers'));
+app.use('/restaurant/volunteers', require('./routes/restaurantVolunteers'));
 
 // Start server
 const PORT = process.env.PORT || 3000;
