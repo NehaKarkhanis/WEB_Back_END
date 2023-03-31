@@ -1,3 +1,5 @@
+//Created By Arpit Ribadiya (B00932018)
+
 const express = require('express');
 const { connectToDatabase } = require('../db/conn');
 const bcrypt = require('bcrypt');
@@ -30,12 +32,16 @@ exports.post_restaurant_signup = async (request, response) => {
             bcrypt.hash(request.body.password, salt, async function (err, password_hash) {
                 const db = await connectToDatabase();
                 db.collection('restaurants').insertOne({
+                    "_id": request.body.email,
                     "name": request.body.name,
                     "address": request.body.address,
                     "postalcode": request.body.postalcode,
                     "phonenumber": request.body.phonenumber,
                     "email": request.body.email,
-                    "password": password_hash
+                    "password": password_hash,
+                    "isapproved": request.body.isapproved,
+                    "posts": [],
+                    "orders": []
                 });
                 return response.status(200).json({
                     "message": "Restaurant Registration Success"
@@ -80,7 +86,8 @@ exports.post_restaurant_login = async (request, response) => {
         const db = await connectToDatabase();
         db.collection('restaurants').findOne({ 'email': request.body.email })
             .then(restaurant => {
-                if (restaurant) {
+                console.log(restaurant.isapproved)
+                if (restaurant && restaurant.isapproved === 1) {
                     bcrypt.compare(request.body.password, restaurant.password)
                         .then(isMatch => {
                             if (isMatch) {
@@ -130,6 +137,7 @@ exports.get_view_restaurant_details = async (request, response) => {
             'email': request.body.email
         }).then(restaurant => {
             const result = {
+                "name" : restaurant.name,
                 "email" : restaurant.email,
                 "address" : restaurant.address,
                 "postalcode" : restaurant.postalcode,

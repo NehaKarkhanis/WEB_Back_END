@@ -1,3 +1,8 @@
+//Created by Viraj Joshi
+//Updated By Arpit Ribadiya (B00932018)
+//Updated by Neha Karkhanis
+
+
 // Import required packages and files
 const express = require('express');
 const app = express();
@@ -16,6 +21,7 @@ const db = connectToDatabase();
 // Set up routes
 app.use('/users', require('./routes/users'));
 app.use('/restaurants', require('./routes/restaurants'));
+app.use('/volunteers', require('./routes/volunteers'));
 app.use('/restaurantorders', require('./routes/restaurantOrders'));
 app.use('/restaurant/volunteers', require('./routes/restaurantVolunteers'));
 
