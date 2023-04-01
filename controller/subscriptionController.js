@@ -7,22 +7,27 @@ exports.manageSubscription = async (req, res) => {
   const res_id = req.body.res_id;
   const email = req.body.email;
   const action = req.body.action;
+  const res_email = req.body.res_email;
 
   if (action === "subscribe") {
     try {
       const db = await connectToDatabase();
-      const usersCollection = await db.collection("users");
 
-      const result = await usersCollection.updateOne(
-        { email: email, subscribed_restaurants: { $ne: res_id } },
-        { $addToSet: { subscribed_restaurants: res_id } }
+      // updating users collection
+      const usersCollection = await db.collection("users");
+      await usersCollection.updateOne(
+        { _id: email, subscribed_restaurants: { $ne: res_email } },
+        { $addToSet: { subscribed_restaurants: res_email } }
       );
-      console.log(result);
-      if (result.modifiedCount === 0) {
-        return res.status(400).send({
-          message: "Already subscribed or no such restaurant exists!",
-        });
-      }
+
+      // updating restaurants collection
+      const restaurantsCollection = await db.collection("restaurants");
+      console.log(res_email);
+      await restaurantsCollection.updateOne(
+        { _id: res_email, subscribed_users: { $ne: email } },
+        { $addToSet: { subscribed_users: email } }
+      );
+
       return res.status(200).send({
         message: "Subscribed Successfully!",
       });
@@ -35,17 +40,21 @@ exports.manageSubscription = async (req, res) => {
   } else if (action === "unsubscribe") {
     try {
       const db = await connectToDatabase();
+
+      // updating users collection
       const usersCollection = await db.collection("users");
-      const result = await usersCollection.updateOne(
-        { email: email },
-        { $pull: { subscribed_restaurants: res_id } }
+      await usersCollection.updateOne(
+        { _id: email },
+        { $pull: { subscribed_restaurants: res_email } }
       );
-      console.log(result);
-      if (result.modifiedCount === 0) {
-        return res.status(400).send({
-          message: "No such restaurant exists!",
-        });
-      }
+
+      // updating restaurants collection
+      const restaurantsCollection = await db.collection("restaurants");
+      restaurantsCollection.updateOne(
+        { _id: res_email },
+        { $pull: { subscribed_users: email } }
+      );
+
       return res.status(200).send({
         message: "Unsubscribed successfully!",
       });
@@ -65,9 +74,9 @@ exports.getAllSubscriptions = async (req, res) => {
   const email = req.body.email;
   try {
     const db = await connectToDatabase();
-    const user = await db.collection("users").find({ email: email }).toArray();
+    const user = await db.collection("users").findOne({ _id: email });
     return res.status(200).send({
-      subscribed_restaurants: user[0].subscribed_restaurants,
+      subscribed_restaurants: user.subscribed_restaurants,
     });
   } catch (err) {
     console.error(err);

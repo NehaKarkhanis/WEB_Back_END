@@ -58,6 +58,8 @@ exports.post_user_signup = async (request, response) => {
             lname: request.body.lname,
             _id: request.body.email,
             password: password_hash,
+            subscribed_restaurants: [],
+            orders: [],
           });
           return response.status(200).json({
             message: "Registration Success",

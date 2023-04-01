@@ -11,7 +11,7 @@ exports.getAllPosts = async (req, res) => {
     const restaurants = await db.collection("restaurants").find().toArray();
     console.log(restaurants);
     const posts = restaurants.map((res) => {
-      return { res_id: res._id.toString(), posts: res.posts };
+      return { res_email: res._id, posts: res.posts };
     });
     return res.status(200).json({
       message: "Posts retrieved",
@@ -30,11 +30,11 @@ exports.getPostsByResID = async (req, res) => {
   try {
     const db = await connectToDatabase();
     console.log(req.body.res_id);
-    const res_id = req.body.res_id;
+    const res_email = req.body.res_email;
     const restaurants = await db.collection("restaurants").find().toArray();
     console.log(restaurants);
     const resPosts = restaurants.find((res) => {
-      return res._id.toString() === res_id;
+      return res._id === res_email;
     });
 
     if (resPosts) {
@@ -44,7 +44,7 @@ exports.getPostsByResID = async (req, res) => {
       });
     } else {
       return res.status(400).json({
-        message: "No such restaurant!",
+        message: "No such restaurant exists!",
       });
     }
   } catch (err) {
