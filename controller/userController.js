@@ -1,3 +1,4 @@
+//Created by Viraj Joshi
 const express = require("express");
 const { connectToDatabase } = require("../db/conn");
 const bcrypt = require("bcrypt");
@@ -158,7 +159,7 @@ exports.get_pass_reset_key = async (request, response) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "virajj60@gmail.com",
+        user: "virajj60@gmail.com", //Password reset key would from this email address
         pass: process.env.gmail_pass,
       },
     });
