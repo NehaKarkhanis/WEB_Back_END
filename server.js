@@ -25,6 +25,7 @@ app.use("/volunteers", require("./routes/volunteers"));
 app.use("/restaurantorders", require("./routes/restaurantOrders"));
 app.use("/restaurant/volunteers", require("./routes/restaurantVolunteers"));
 app.use("/subscription", require("./routes/subscription"));
+app.use("/posts", require("./routes/posts"));
 
 // Start server
 const PORT = process.env.PORT || 3000;
