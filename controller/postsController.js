@@ -17,7 +17,6 @@ exports.getAllPosts = async (req, res) => {
     });
     return res.status(200).json({
       message: "Posts retrieved",
-      // restaurants: restaurants,
       posts,
     });
   } catch (err) {
@@ -165,14 +164,15 @@ exports.get_past_post = async (req, res) => {
 exports.get_post_by_id = async (req, res) => {
   try {
     const db = await connectToDatabase();
-    console.log(req.body.id);
+    console.log(req.params.id);
     db.collection("posts")
       .findOne({
-        _id: new mongo.ObjectId(req.body.id),
+        _id: new mongo.ObjectId(req.params.id),
       })
       .then((post) => {
         console.log(post);
         const result = {
+          id: post._id,
           itemName: post.Item_name,
           itemQuantity: post.Item_Quantity,
           startTime: post.Start_Time,
