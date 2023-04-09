@@ -25,11 +25,8 @@ app.use("/volunteers", require("./routes/volunteers"));
 app.use("/restaurantorders", require("./routes/restaurantOrders"));
 app.use("/restaurant/volunteers", require("./routes/restaurantVolunteers"));
 app.use("/subscription", require("./routes/subscription"));
-<<<<<<< HEAD
-app.use("/admin", require("./routes/admin"));
-=======
 app.use("/posts", require("./routes/posts"));
->>>>>>> origin/main
+app.use("/admin", require("./routes/admin"));
 
 // Start server
 const PORT = process.env.PORT || 3000;
