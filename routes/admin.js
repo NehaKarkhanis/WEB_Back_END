@@ -10,5 +10,6 @@ admin_router.post('/login', admin_controller.post_validateAdmin);
 admin_router.get('/pendingrestaurantapplications', admin_controller.get_pending_restaurantApplication);
 admin_router.post('/changerestaurantapplicationstatus/:restaurantId', admin_controller.post_change_restaurantApplication_status);
 admin_router.get('/posts', admin_controller.get_all_post);
+admin_router.delete('/post/:postId', admin_controller.delete_post);
 
 module.exports = admin_router;

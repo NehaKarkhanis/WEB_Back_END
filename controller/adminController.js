@@ -6,6 +6,7 @@ const { connect } = require("../routes/users");
 const nodemailer = require("nodemailer");
 const { request } = require("express");
 const path = require("path");
+const { ObjectId } = require("mongodb");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 
@@ -101,19 +102,29 @@ exports.post_change_restaurantApplication_status = async (request, response) => 
           return response.status(400).json({ error: true, message: 'bad request.' });
         }
         let newStatusinDb=0;
-        if (newStatus==='Approved'){
+        if (newStatus==='approved'){
             newStatusinDb=1;
+            const updateResult = restaurantCollection.updateOne({ _id: restaurantId }, { $set: { isapproved: newStatus } });
+            if(!updateResult){
+                return response.status(503).json({
+                    "error": true,
+                    "message": "Internal Server Error"
+                });
+    
+            }
+        }else{
+          const deleteResult = restaurantCollection.deleteOne({ _id: restaurantId });
+          if(!deleteResult){
+              return response.status(503).json({
+                  "error": true,
+                  "message": "Internal Server Error"
+              });
+  
+          }
         }
 
         // find the restaurant by restaurantId and update its status
-        const updateResult = restaurantCollection.updateOne({ _id: restaurantId }, { $set: { status: newStatus } });
-        if(!updateResult){
-            return response.status(503).json({
-                "error": true,
-                "message": "Internal Server Error"
-            });
 
-        }
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -179,5 +190,67 @@ exports.get_all_post = async (request, response) => {
             "message": "Internal Server Error"
         });
     }
+};
+exports.delete_post = async (request, response) => {
+  try {
+    const email = request.headers.email;
+    if (!email) {
+        return response.status(401).json({ error: true, message: 'unauthorized' });
+    }
+    const db = await connectToDatabase();
+    const adminCollection = db.collection('admin');
+    const postCollection = db.collection('posts');
+    //check if the admin exists to allow further processing
+    const admin = await adminCollection.findOne({ _id: email });
+    if (!admin) {
+      return response.status(401).send({ error:true , message: 'unauthorized.' });
+    }
+    //get request params
+    const postId = request.params.postId;
+    if (!postId) {
+      return response.status(400).json({ error: true, message: 'bad request.' });
+    }
+    //check if the admin exists to allow further processing
+    const post = await postCollection.findOne({ _id: new ObjectId(postId)});
+    let restaurantEmail=post.rest_id;
+    const updateResult = postCollection.deleteOne({ _id: new ObjectId(postId)});
+    if(!updateResult){
+        return response.status(503).json({
+                "error": true,
+                "message": "Internal Server Error"
+            });
+
+        }
+    // mail the restaurant on post deletion 
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "virajj60@gmail.com",
+          pass: process.env.gmail_pass,
+        },
+      });
+  
+      let emailSubject=""
+      let emailBody=""
+      console.log('post '+postId+' deleted successfully');
+      emailSubject="Last serve deleted"
+      emailBody=`Your post has been deleted due to compliance issues`
+    
+    const mailOptions = {
+        from: "virajj60@gmail.com",
+        to: restaurantEmail,
+        subject: emailSubject,
+        text: emailBody,
+      };
+      const info = await transporter.sendMail(mailOptions);
+      response.status(204).send();
+
+} catch (error) {
+    console.error(error);
+    return response.status(503).json({
+        "error": true,
+        "message": "Internal Server Error"
+    });
+}
 };
 
