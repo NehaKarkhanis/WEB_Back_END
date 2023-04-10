@@ -4,7 +4,6 @@ const { connectToDatabase } = require("../db/conn");
 const bcrypt = require("bcrypt");
 const { connect } = require("../routes/users");
 const nodemailer = require("nodemailer");
-const { request } = require("express");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
@@ -61,6 +60,7 @@ exports.post_user_signup = async (request, response) => {
             password: password_hash,
             subscribed_restaurants: [],
             orders: [],
+            isLoggedIn: true,
           });
           return response.status(200).json({
             message: "Registration Success",
@@ -111,8 +111,14 @@ exports.post_validateUser = async (request, response) => {
         if (user) {
           bcrypt
             .compare(request.body.password, user.password)
-            .then((isMatch) => {
+            .then(async (isMatch) => {
               if (isMatch) {
+                await db
+                  .collection("users")
+                  .updateOne(
+                    { _id: request.body.email },
+                    { $set: { isLoggedIn: true } }
+                  );
                 return response.status(200).json({
                   message: "Authentication successful",
                 });
@@ -232,6 +238,41 @@ exports.put_update_pass = async (request, response) => {
       message: "Password Updated",
     });
   } catch (error) {
+    return response.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+exports.isLoggedIn = async (request, response) => {
+  try {
+    const email = request.body.email;
+    const db = await connectToDatabase();
+    const result = await db
+      .collection("users")
+      .findOne({ _id: email, isLoggedIn: true });
+    if (result) {
+      return response.status(200).send({ message: true });
+    } else {
+      response.status(200).send({ message: false });
+    }
+  } catch (error) {
+    return response.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+exports.logout = async (request, response) => {
+  try {
+    const email = request.body.email;
+    const db = await connectToDatabase();
+    const result = db
+      .collection("users")
+      .updateOne({ _id: email }, { $set: { isLoggedIn: false } });
+    return response.status(200).send({ message: "Successfully logged out." });
+  } catch (error) {
+    console.log(error);
     return response.status(500).json({
       message: "Internal Server Error",
     });
