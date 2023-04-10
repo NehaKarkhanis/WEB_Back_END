@@ -323,8 +323,9 @@ exports.post_user_orders = async (req, res) => {
 
 exports.delete_user_order = async (req, res) => {
   try {
+    console.log(req.body);
     const db = await connectToDatabase();
-    const deleteResult = await db.collection('orders').deleteOne({ _id: new ObjectId((req.body._id)) });
+    const deleteResult = await db.collection('orders').deleteOne({ _id: new ObjectId(req.body.id) });
     if (deleteResult.deletedCount > 0) {
       return res.status(200).json({
         'message': 'Deleted order successfully'
