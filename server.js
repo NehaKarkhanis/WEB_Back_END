@@ -29,6 +29,7 @@ app.use("/subscription", require("./routes/subscription"));
 app.use("/posts", require("./routes/posts"));
 app.use("/admin", require("./routes/admin"));
 app.use("/appointments", require("./routes/appointments"));
+app.use('/donation', require('./routes/donation'));
 
 // Start server
 const PORT = process.env.PORT || 3000;
