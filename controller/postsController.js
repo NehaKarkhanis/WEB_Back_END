@@ -58,19 +58,28 @@ exports.getPostsByResID = async (req, res) => {
 exports.post_create_post = async (request, response) => {
   try {
     bcrypt.genSalt(10, async function (err, salt) {
+      let restaurantName;
       const db = await connectToDatabase();
-      db.collection("posts").insertOne({
-        rest_id: request.body.restId,
-        Item_name: request.body.itemName,
-        Item_Quantity: request.body.itemQuantity,
-        Start_Time: request.body.startTime,
-        End_Time: request.body.endTime,
-        Food_Type: request.body.foodType,
-        CreationTime: new Date(),
-      });
-      return response.status(200).json({
-        message: "Post Created Successfully!!!",
-      });
+
+      db.collection("restaurants")
+        .findOne({
+          email: request.body.restId,
+        })
+        .then((restaurant) => {
+          db.collection("posts").insertOne({
+            rest_id: request.body.restId,
+            rest_name: restaurant.name,
+            Item_name: request.body.itemName,
+            Item_Quantity: request.body.itemQuantity,
+            Start_Time: request.body.startTime,
+            End_Time: request.body.endTime,
+            Food_Type: request.body.foodType,
+            CreationTime: new Date(),
+          });
+          return response.status(200).json({
+            message: "Post Created Successfully!!!",
+          });
+        });
     });
   } catch (error) {
     console.error(error);
