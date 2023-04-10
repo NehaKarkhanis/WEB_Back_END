@@ -1,9 +1,12 @@
+// Created by Jay Kania (B00923785)
+// Updated By Arpit Ribadiya (B00932018)
+
 const express = require("express");
 const postsRouter = express.Router();
 
 const postsControlller = require("../controller/postsController");
 
-// get posts from every restaurant
+// get posts from all restaurants
 postsRouter.get("/", postsControlller.getAllPosts);
 
 // get posts from specific restaurant
