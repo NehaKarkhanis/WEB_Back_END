@@ -16,5 +16,6 @@ user_router.post("/verifyKey", user_controller.post_verify_resetkey);
 user_router.put("/updatePassword", user_controller.put_update_pass);
 user_router.post("/loggedIn", user_controller.isLoggedIn);
 user_router.post("/logout", user_controller.logout);
+user_router.post("/restaurants", user_controller.getSubscribedRestaurants);
 
 module.exports = user_router;

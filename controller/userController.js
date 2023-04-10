@@ -1,5 +1,5 @@
 //Created by Viraj Joshi
-const express = require("express");
+// Updated by Jay Kania
 const { connectToDatabase } = require("../db/conn");
 const bcrypt = require("bcrypt");
 const { connect } = require("../routes/users");
@@ -276,5 +276,25 @@ exports.logout = async (request, response) => {
     return response.status(500).json({
       message: "Internal Server Error",
     });
+  }
+};
+
+exports.getSubscribedRestaurants = async (request, response) => {
+  try {
+    const db = await connectToDatabase();
+    const user = await db.collection("users").findOne({
+      _id: request.body.email,
+    });
+    if (user) {
+      return response.status(200).send({
+        subscribed_restaurants: user.subscribed_restaurants,
+      });
+    } else {
+      return response.status(400).send({
+        message: "No user details found",
+      });
+    }
+  } catch (error) {
+    console.error(error);
   }
 };
