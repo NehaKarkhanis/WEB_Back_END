@@ -17,5 +17,7 @@ user_router.put("/updatePassword", user_controller.put_update_pass);
 user_router.post("/loggedIn", user_controller.isLoggedIn);
 user_router.post("/logout", user_controller.logout);
 user_router.post("/restaurants", user_controller.getSubscribedRestaurants);
+user_router.post("/orders", user_controller.post_user_orders);
+user_router.delete("/cancelOrder", user_controller.delete_user_order);
 
 module.exports = user_router;
