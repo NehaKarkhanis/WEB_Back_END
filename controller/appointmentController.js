@@ -2,6 +2,7 @@ const { connectToDatabase } = require("../db/conn");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const sgMail = require("@sendgrid/mail");
+const { v4: uuid } = require("uuid");
 
 // add and retrieve appointments
 
@@ -24,7 +25,9 @@ exports.getAllappointements = async (req, res) => {
 exports.addAppointment = async (req, res) => {
   try {
     const db = await connectToDatabase();
+    const newID = uuid();
     db.collection("orders").insertOne({
+      _id: newID,
       restaurant_id: req.body.rest_id,
       user_id: req.body.user_id,
       name: req.body.user_name,
@@ -34,6 +37,15 @@ exports.addAppointment = async (req, res) => {
       items: req.body.items,
       status: "not-picked",
     });
+    const restaurant = await db
+      .collection("restaurants")
+      .findOne({ _id: req.body.rest_id });
+    await db
+      .collection("restaurants")
+      .updateOne(
+        { _id: req.body.rest_id },
+        { $set: { orders: [...restaurant.orders, newID] } }
+      );
     if (req.body.sendEmail) {
       // send email to the user
       const recieptHtml = `<table>
