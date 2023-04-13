@@ -2,6 +2,7 @@
 //Updated By Arpit Ribadiya (B00932018)
 //Updated by Neha Karkhanis
 //Updated by Lav Patel (B00910579)
+// Updated by Jay Kania
 
 // Import required packages and files
 const express = require("express");
@@ -27,6 +28,8 @@ app.use("/restaurant", require("./routes/restaurantVolunteers"));
 app.use("/subscription", require("./routes/subscription"));
 app.use("/posts", require("./routes/posts"));
 app.use("/admin", require("./routes/admin"));
+app.use("/appointments", require("./routes/appointments"));
+app.use('/donation', require('./routes/donation'));
 
 // Start server
 const PORT = process.env.PORT || 3000;
