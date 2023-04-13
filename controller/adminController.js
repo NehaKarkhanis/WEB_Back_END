@@ -253,4 +253,46 @@ exports.delete_post = async (request, response) => {
     });
 }
 };
+exports.get_overview = async (request, response) => {
+  try {
+    const email = request.headers.email;
+    if (!email) {
+        return response.status(401).json({ error: true, message: 'unauthorized' });
+    }
+    const db = await connectToDatabase();
+    const adminCollection = db.collection('admin');
+    const postCollection = db.collection('posts');
+    const restaurantsCollection = db.collection('restaurants');
+    const usersCollection = db.collection('users');
+
+
+    //check if the admin exists to allow further processing
+    const admin = await adminCollection.findOne({ _id: email });
+    if (!admin) {
+      return response.status(401).send({ error:true , message: 'unauthorized.' });
+    }
+    let numberOfUsers= await usersCollection.countDocuments();
+    let allRestaurantsCount= await restaurantsCollection.countDocuments();
+    let pendingRestaurantsCount= await restaurantsCollection.countDocuments({isapproved: 0});
+    let enrolledRestaurantCount= allRestaurantsCount-pendingRestaurantsCount;
+    let posts = await postCollection.find().toArray();
+    let activePosts = posts.filter(x => new Date(x.Start_Time) > new Date());
+    let activePostsCount=activePosts.length;
+    return response.status(200).json({
+      "users": numberOfUsers,
+      "enrolledRestaurants": enrolledRestaurantCount,
+      "pendingRestaurants": pendingRestaurantsCount,
+      "posts":posts.length,
+      "activePostCount":activePostsCount,
+
+  });
+
+} catch (error) {
+    console.error(error);
+    return response.status(503).json({
+        "error": true,
+        "message": "Internal Server Error"
+    });
+}
+};
 
