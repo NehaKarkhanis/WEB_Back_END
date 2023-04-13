@@ -2,7 +2,6 @@
 // Updated by Jay Kania
 const { connectToDatabase } = require("../db/conn");
 const bcrypt = require("bcrypt");
-const { connect } = require("../routes/users");
 const nodemailer = require("nodemailer");
 const path = require("path");
 const { ObjectId } = require("mongodb");

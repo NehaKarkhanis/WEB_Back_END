@@ -12,7 +12,6 @@ var mongo = require("mongodb");
 exports.getAllPosts = async (req, res) => {
   try {
     const db = await connectToDatabase();
-    // console.log(req.params.id);
     const posts = await db.collection("posts").find().toArray();
     return res.status(200).json({
       message: "Posts retrieved",

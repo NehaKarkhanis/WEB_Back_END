@@ -1,10 +1,7 @@
 //Created by Lav Patel
-const express = require("express");
 const { connectToDatabase } = require("../db/conn");
 const bcrypt = require("bcrypt");
-const { connect } = require("../routes/users");
 const nodemailer = require("nodemailer");
-const { request } = require("express");
 const path = require("path");
 const { ObjectId } = require("mongodb");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });

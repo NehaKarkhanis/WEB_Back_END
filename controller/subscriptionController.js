@@ -1,4 +1,3 @@
-const { ObjectId } = require("mongodb");
 const { connectToDatabase } = require("../db/conn");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
