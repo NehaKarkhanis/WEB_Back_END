@@ -96,7 +96,7 @@ exports.get_active_orders = async (request, response) => {
         .find({
           $and: [
             { _id: { $in: orderIds.map((_id) => (_id)) } },
-            {$or: [{ status: 'pending' },{ status: 'packed' },],},
+            {$or: [{ status: 'pending' },{ status: 'not-picked' },{ status: 'packed' },],},
           ],
         })
         .toArray();
