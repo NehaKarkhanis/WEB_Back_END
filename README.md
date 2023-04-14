@@ -66,7 +66,7 @@ To test the following functionality
 ## Tasks 
 
 * User Registration
-* User Login 
+* User Login - Existing user credentials - virajj260@gmail.com / Test@123
 * User Password Reset 
 * User View Profile Details
 * User Edit Profile Details 
